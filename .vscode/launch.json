@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "CoinMarketCap",
+            "type": "python",
+            "request": "launch",
+            "program": "coinmarketcap/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}
