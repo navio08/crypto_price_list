@@ -1,0 +1,9 @@
+services:
+  coinmarketcap:
+    build: coinmarketcap
+    ports:
+      - "8081:8081"
+  cryptorank:
+    build: cryptorank
+    ports:
+      - "8082:8082"
