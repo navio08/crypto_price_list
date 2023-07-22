@@ -1,22 +1,20 @@
-from fastapi import FastAPI
-from requests import Session
+from fastapi import FastAPI, Header
+from requests import Session, Request
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
-from typing import Dict, Any
-
+from typing import Dict, Any, Annotated
 import logging
-
 from config import API_KEY, URL_LATEST, URL_HISTORICAL, URL_VERSION, ENDPOINT_TIMEOUT
 
 
 class AppV1:
     def __init__(self) -> None:
         self.api = FastAPI(debug=True)
+        self.api.middleware('http')(self.add_correlationId)
         self.api.api_route("/latest")(self.get_latest)
         self.api.api_route("/historical")(self.get_historical)
 
         self.parameters: Dict = {}
-
         self.session = Session()
         self.session.headers.update(
             {
@@ -26,17 +24,24 @@ class AppV1:
             }
         )
 
-    def get_latest(self, limit: str):
-        return self.get_coinmarketcap(URL_LATEST, {"limit": limit})
+    async def add_correlationId(self, request: Request, call_next):
+        response = await call_next(request)
+        if cid := request.headers.get("cid"):
+            response.headers["cid"] = cid
+        return response
+
+    def get_latest(self, limit: str, cid: Annotated[str | None, Header()] = "test_cid"):
+        return self.get_coinmarketcap(URL_LATEST, cid, {"limit": limit})
 
     def get_historical(self, limit: int, date: str):
         return self.get_coinmarketcap(URL_HISTORICAL, {"limit": limit, "date": date})
 
-    def get_coinmarketcap(self, url: str, additional_query_params: Dict = None):
+    def get_coinmarketcap(self, url: str, cid: str, additional_query_params: Dict = None):
         try:
             additional_query_params = additional_query_params or {}
             # fmt: off
             response = self.session.get(url, params={**self.parameters, **additional_query_params}, timeout=ENDPOINT_TIMEOUT)
+            response.headers.update({"cid": cid})
             return self.clean(response.text)
             # fmt: on
         except (ConnectionError, Timeout, TooManyRedirects) as error:

@@ -52,3 +52,12 @@ class TestHistorical:
             "Your API Key subscription plan doesn't support this endpoint."
             in response.text
         )
+
+
+class TestCorrelationId:
+    @pytest.mark.anyio
+    async def test_get_ranklatest(self):
+        async with AsyncClient(app=coinmarketApi, base_url="http://test") as ac:
+            response = await ac.get("/ranklatest?limit=1", headers={"cid": "testcid"})
+
+        assert response.headers["cid"] == "testcid"

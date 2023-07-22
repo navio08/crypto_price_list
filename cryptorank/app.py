@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from requests import Session
+from requests import Session, Request
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
 from typing import Dict, Any
@@ -12,6 +12,7 @@ from config import API_KEY, URL_RANKLATEST, URL_RANKHISTORICAL, URL_VERSION, END
 class AppV1:
     def __init__(self) -> None:
         self.api = FastAPI(debug=True)
+        self.api.middleware('http')(self.add_correlationId)
         self.api.api_route("/ranklatest")(self.get_ranklatest)
         self.api.api_route("/rankhistorical")(self.get_rankhistorical)
 
@@ -27,6 +28,12 @@ class AppV1:
                 "Accept-Encoding": "deflate, gzip",
             }
         )
+
+    async def add_correlationId(self, request: Request, call_next):
+        response = await call_next(request)
+        if cid := request.headers.get("cid"):
+            response.headers["cid"] = cid
+        return response
 
     def get_ranklatest(self, limit: str):
         return self.get_crytporank(URL_RANKLATEST, {"limit": limit})
