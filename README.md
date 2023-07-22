@@ -52,4 +52,16 @@ Cons:
 
 ## The Aggregator Pattern
 
-## Manual to run the code
+
+## Possible improvements
+- API Gateway to help scalability and request caching
+- Add authorization
+
+## Guide to run the code
+```bash
+$ git clone git@github.com:navio08/crypto_price_list.git
+$ cd crypto_price_list
+$ docker-compose build
+$ docker-compose up -d
+$ curl http://localhost:8080/?limit=100
+```
