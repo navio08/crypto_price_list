@@ -13,6 +13,7 @@ class AppV1:
     def __init__(self) -> None:
         self.api = FastAPI(debug=True)
         self.api.api_route("/ranklatest")(self.get_ranklatest)
+        self.api.api_route("/rankhistorical")(self.get_rankhistorical)
 
         self.parameters: Dict = {
             "convert": "USD",
@@ -29,6 +30,9 @@ class AppV1:
 
     def get_ranklatest(self, limit: str):
         return self.get_crytporank(URL_RANKLATEST, {"limit": limit})
+
+    def get_rankhistorical(self, limit: int, time: str):
+        return self.get_crytporank(URL_RANKHISTORICAL, {"limit": limit, "time": time})
 
     def get_crytporank(self, url: str, additional_query_params: Dict = None):
         try:
