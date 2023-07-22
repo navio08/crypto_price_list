@@ -7,6 +7,14 @@
             "program": "coinmarketcap/main.py",
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "CryptoRank",
+            "type": "python",
+            "request": "launch",
+            "program": "cryptorank/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }
