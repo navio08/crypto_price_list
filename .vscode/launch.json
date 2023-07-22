@@ -15,6 +15,14 @@
             "program": "cryptorank/main.py",
             "console": "integratedTerminal",
             "justMyCode": false
+        },
+        {
+            "name": "Fortris",
+            "type": "python",
+            "request": "launch",
+            "program": "fortrisapp/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": false
         }
     ]
 }
