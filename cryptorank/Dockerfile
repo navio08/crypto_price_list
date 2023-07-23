@@ -11,4 +11,4 @@ ENV WEB_PORT=8082 DEBUG=0
 EXPOSE 8082
 ENV WEB_HOST=crytporank
 
-ENTRYPOINT [ "python3", "main.py" ]
+ENTRYPOINT [ "opentelemetry-instrument", "python3", "main.py" ]

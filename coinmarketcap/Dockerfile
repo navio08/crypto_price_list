@@ -11,4 +11,4 @@ ENV WEB_PORT=8081 DEBUG=0
 EXPOSE 8081
 ENV WEB_HOST=coinmarketcap
 
-ENTRYPOINT [ "python3", "main.py" ]
+ENTRYPOINT [ "opentelemetry-instrument", "python3", "main.py" ]

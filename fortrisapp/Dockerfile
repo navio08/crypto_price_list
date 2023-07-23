@@ -12,4 +12,4 @@ ENV HOST_COINMARKET=coinmarketcap HOST_CRYPTORANK=crytporank
 EXPOSE 8080
 ENV WEB_HOST=fortrisapp
 
-ENTRYPOINT [ "python3", "main.py" ]
+ENTRYPOINT [ "opentelemetry-instrument", "python3", "main.py" ]
