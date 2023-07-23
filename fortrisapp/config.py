@@ -11,3 +11,6 @@ WEB_PORT = int(os.getenv("WEB_PORT", 8080))
 DEBUG = os.getenv("DEBUG", "1")
 
 MY_SERVICE_NAME = "fortrisApp"
+
+HOST_COINMARKET = os.getenv("HOST_COINMARKET", "0.0.0.0")
+HOST_CRYPTORANK = os.getenv("HOST_CRYPTORANK", "0.0.0.0")

@@ -7,10 +7,12 @@ import logging
 import concurrent.futures
 from uuid import uuid4
 
+from config import HOST_COINMARKET, HOST_CRYPTORANK
+
 from otelconfig import tracer
 
-URL_COINMARKET = "http://localhost:8081/latest"
-URL_CRYPTORANK = "http://localhost:8082/ranklatest"
+URL_COINMARKET = f"http://{HOST_COINMARKET}:8081/latest"
+URL_CRYPTORANK = f"http://{HOST_CRYPTORANK}:8082/ranklatest"
 
 
 class App:
@@ -62,6 +64,7 @@ class App:
         session = Session()
         session.headers.update(self.headers)
         session.headers.update({"cid": cid})
+        logging.info(f"sending request to:{url}")
         return session.get(url=url, params={"limit": limit})
 
     def get_uuid(self, future):
