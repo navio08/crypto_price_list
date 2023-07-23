@@ -1,9 +1,16 @@
 services:
   coinmarketcap:
+    hostname: coinmarketcap
     build: coinmarketcap
     ports:
       - "8081:8081"
   cryptorank:
+    hostname: crytporank
     build: cryptorank
     ports:
       - "8082:8082"
+  fortris:
+    hostname: fortrisapp
+    build: fortrisapp
+    ports:
+      - "8080:8080"
