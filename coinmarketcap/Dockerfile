@@ -10,5 +10,6 @@ RUN pip install -r requirements.txt
 ENV WEB_PORT=8081 DEBUG=0
 EXPOSE 8081
 ENV WEB_HOST=coinmarketcap
+ENV HOST_JAEGER=jaeger
 
 ENTRYPOINT [ "opentelemetry-instrument", "python3", "main.py" ]
