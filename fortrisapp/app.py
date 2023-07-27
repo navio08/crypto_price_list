@@ -7,9 +7,8 @@ import logging
 import concurrent.futures
 from uuid import uuid4
 
-from config import HOST_COINMARKET, HOST_CRYPTORANK
-
 from otelconfig import tracer
+from config import HOST_COINMARKET, HOST_CRYPTORANK, ENDPOINT_TIMEOUT
 from aggregator import aggregate
 
 URL_COINMARKET = f"http://{HOST_COINMARKET}:8081/latest"
@@ -34,6 +33,7 @@ class App:
                 return self.fetch_data_multithreaded(limit, format)
         except (ConnectionError, Timeout, TooManyRedirects) as error:
             logging.error(error)
+            return str(error)
         except Exception as error:
             logging.error(f"Unknown error. Try again later: {str(error)}")
 
@@ -70,7 +70,7 @@ class App:
         session.headers.update(self.headers)
         session.headers.update({"cid": cid})
         print(f"sending request to:{url}")
-        return session.get(url=url, params={"limit": limit})
+        return session.get(url=url, params={"limit": limit}, timeout=ENDPOINT_TIMEOUT)
 
     def get_uuid(self, future):
         return future.headers["cid"]
