@@ -6,7 +6,8 @@
             "request": "launch",
             "program": "coinmarketcap/main.py",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "python": "/home/jcarbonell/Repositories/Fortris/crypto_price_list/coinmarketcap/venv_coinmarketcap/bin/python"
         },
         {
             "name": "CryptoRank",
@@ -14,7 +15,8 @@
             "request": "launch",
             "program": "cryptorank/main.py",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "python": "/home/jcarbonell/Repositories/Fortris/crypto_price_list/cryptorank/venv_cryptoRank/bin/python"
         },
         {
             "name": "Fortris",
@@ -22,7 +24,8 @@
             "request": "launch",
             "program": "fortrisapp/main.py",
             "console": "integratedTerminal",
-            "justMyCode": false
+            "justMyCode": false,
+            "python": "/home/jcarbonell/Repositories/Fortris/crypto_price_list/fortrisapp/venv_fortris/bin/python"
         }
     ]
 }
