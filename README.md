@@ -46,12 +46,28 @@ Cons:
 
 
 ### RPC
+Pros:
+- easy communication between backends
+- guarantees all data is transfered
+- faster
 
+Cons:
+- Adds complexity
+- sync process. point of failure due to host for unknown reasons
 
 ### HTTP
+Pros:
+- simple. reduces complexiy
+- easy to scale
+- restricted by timeouts
+
+Cons:
+- data might be lost
+- slower than RPCs
+
 
 ## The Aggregator Pattern
-
+To merge data coming from different services, I have decided to implement the Aggregator Pattern using the "Scatter gather pattern" as explained [here](https://medium.com/nerd-for-tech/design-patterns-for-microservices-aggregator-pattern-99c122ac6b73)
 
 ## Possible improvements
 - API Gateway to help scalability and request caching
@@ -59,9 +75,10 @@ Cons:
 
 ## Guide to run the code
 ```bash
-$ git clone git@github.com:navio08/crypto_price_list.git
-$ cd crypto_price_list
-$ docker-compose build
-$ docker-compose up -d
+$ git clone git@github.com:navio08/crypto_price_list.git && \
+cd crypto_price_list && \
+docker-compose build --no-cache && \
+docker-compose up -d 
+
 $ curl http://localhost:8080/?limit=100
 ```

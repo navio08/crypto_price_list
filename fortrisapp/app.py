@@ -8,6 +8,7 @@ import concurrent.futures
 from uuid import uuid4
 
 from config import HOST_COINMARKET, HOST_CRYPTORANK
+from aggregator import aggregate
 
 URL_COINMARKET = f"http://{HOST_COINMARKET}:8081/latest"
 URL_CRYPTORANK = f"http://{HOST_CRYPTORANK}:8082/ranklatest"
@@ -24,27 +25,31 @@ class App:
             "Accept-Encoding": "deflate, gzip",
         }
 
-    def get_data(self, limit: int):
+    def get_data(self, limit: int, format: str = 'json'):
+        print(f"Starting request with variables limit:{limit}, format:{format}")
         try:
-            return self.fetch_data_multithreaded(limit)
+            return self.fetch_data_multithreaded(limit, format)
         except (ConnectionError, Timeout, TooManyRedirects) as error:
             logging.error(error)
         except Exception as error:
             logging.error(f"Unknown error. Try again later: {str(error)}")
 
-    def fetch_data_multithreaded(self, limit):
+    def fetch_data_multithreaded(self, limit: int, format: str = 'json'):
         coinmarketUUID, cryptorankUUID = str(uuid4().hex), str(uuid4().hex)
         _my_futures = {coinmarketUUID: None, cryptorankUUID: None}
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
                 executor.submit(self.get_coinmarketcap, limit=limit, cid=coinmarketUUID),
-                executor.submit(self.get_cryptorank, limit=limit, cid=cryptorankUUID)
+                executor.submit(self.get_cryptorank, limit=limit, cid=cryptorankUUID),
             ]
             for future in concurrent.futures.as_completed(futures):
                 _my_futures[self.get_uuid(future.result())] = future.result().text
 
         print(_my_futures)
-        return _my_futures
+        result = aggregate(_my_futures, coinmarketUUID, cryptorankUUID, format)
+
+        print(result)
+        return result
 
     def get_coinmarketcap(self, limit: int, cid: str):
         return self.fetch(URL_COINMARKET, limit, cid)
@@ -56,7 +61,7 @@ class App:
         session = Session()
         session.headers.update(self.headers)
         session.headers.update({"cid": cid})
-        logging.info(f"sending request to:{url}")
+        print(f"sending request to:{url}")
         return session.get(url=url, params={"limit": limit})
 
     def get_uuid(self, future):
