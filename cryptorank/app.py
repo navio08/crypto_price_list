@@ -7,7 +7,6 @@ from typing import Dict, Any
 import logging
 
 from config import API_KEY, URL_RANKLATEST, URL_RANKHISTORICAL, URL_VERSION, ENDPOINT_TIMEOUT
-from otelconfig import tracer
 
 
 class AppV1:
@@ -37,8 +36,7 @@ class AppV1:
         return response
 
     def get_ranklatest(self, limit: str):
-        with tracer.start_as_current_span("CRYPTORANK::start_request"):
-            return self.get_crytporank(URL_RANKLATEST, {"limit": limit})
+        return self.get_crytporank(URL_RANKLATEST, {"limit": limit})
 
     def get_rankhistorical(self, limit: int, time: str):
         return self.get_crytporank(URL_RANKHISTORICAL, {"limit": limit, "time": time})
@@ -47,18 +45,16 @@ class AppV1:
         try:
             additional_query_params = additional_query_params or {}
             # fmt: off
-            with tracer.start_as_current_span("CRYPTORANK::request_api"):
-                response = self.session.get(url, params={**self.parameters, **additional_query_params}, timeout=ENDPOINT_TIMEOUT)
-                return self.clean(response.text)
+            response = self.session.get(url, params={**self.parameters, **additional_query_params}, timeout=ENDPOINT_TIMEOUT)
+            return self.clean(response.text)
             # fmt: on
         except (ConnectionError, Timeout, TooManyRedirects) as error:
             logging.error(error)
 
     def clean(self, response: str) -> Dict:
-        with tracer.start_as_current_span("CRYPTORANK::cleaning_data"):
-            response_json = json.loads(response)
-            if "data" not in response_json:
-                return response_json
+        response_json = json.loads(response)
+        if "data" not in response_json:
+            return response_json
 
         return {item["symbol"]: item["rank"] for item in response_json["data"]}
 
