@@ -1,6 +1,7 @@
 from typing import Dict
 import json
 import pandas as pd
+import logging
 
 
 options_to_json = {"orient": "split", "index": False}
@@ -23,5 +24,5 @@ def aggregate(result: Dict, uuid_prices: str, uuid_rank: str, format: str = "jso
         else result_merge.to_csv(**options_to_csv)
     )
 
-    print(result_formatted)
+    logging.info(result_formatted)
     return result_formatted
