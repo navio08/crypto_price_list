@@ -82,3 +82,9 @@ docker-compose up -d
 
 $ curl http://localhost:8080/?limit=100
 ```
+
+## tips to develop
+```bash
+$ BRANCH=feature/jaeger; cd .. && mkdir tmp && cd tmp && git clone git@github.com:navio08/crypto_price_list.git && cd crypto_price_list && git checkout $BRANCH && docker-compose build --no-cache && docker-compose up -d
+$ docker compose down && cd ../.. && rm -rf tmp && cd crypto_price_list
+``` 
