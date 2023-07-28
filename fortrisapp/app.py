@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from requests import Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from typing import Dict
+import json
 
 import logging
 import concurrent.futures
@@ -26,14 +27,15 @@ class App:
         }
 
     def get_data(self, limit: int, format: str = 'json'):
-        print(f"Starting request with variables limit:{limit}, format:{format}")
+        logging.info(f"Starting request with variables limit:{limit}, format:{format}")
         try:
             return self.fetch_data_multithreaded(limit, format)
-        except (ConnectionError, Timeout, TooManyRedirects) as error:
+        except (ConnectionError, Timeout, TooManyRedirects, AssertionError) as error:
             logging.error(error)
             return str(error)
         except Exception as error:
             logging.error(f"Unknown error. Try again later: {str(error)}")
+            return str(error)
 
     def fetch_data_multithreaded(self, limit: int, format: str = 'json'):
         coinmarketUUID, cryptorankUUID = str(uuid4().hex), str(uuid4().hex)
@@ -46,10 +48,11 @@ class App:
             for future in concurrent.futures.as_completed(futures):
                 _my_futures[self.get_uuid(future.result())] = future.result().text
 
-        print(_my_futures)
+        self.check_valid(_my_futures)
+        logging.info(_my_futures)
         result = aggregate(_my_futures, coinmarketUUID, cryptorankUUID, format)
 
-        print(result)
+        logging.info(result)
         return result
 
     def get_coinmarketcap(self, limit: int, cid: str):
@@ -62,11 +65,16 @@ class App:
         session = Session()
         session.headers.update(self.headers)
         session.headers.update({"cid": cid})
-        print(f"sending request to:{url}")
+        logging.info(f"sending request to:{url}")
         return session.get(url=url, params={"limit": limit}, timeout=ENDPOINT_TIMEOUT)
 
     def get_uuid(self, future):
         return future.headers["cid"]
+
+    def check_valid(self, result: Dict) -> bool:
+        for v in result.values():
+            if not isinstance(json.loads(v), dict):
+                raise RuntimeError(result[v])
 
 
 fortrisApi = App().api

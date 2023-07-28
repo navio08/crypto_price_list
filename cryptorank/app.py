@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from requests import Session, Request
+from requests import Session, Request, Response
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
 from typing import Dict, Any
@@ -46,17 +46,18 @@ class AppV1:
             additional_query_params = additional_query_params or {}
             # fmt: off
             response = self.session.get(url, params={**self.parameters, **additional_query_params}, timeout=ENDPOINT_TIMEOUT)
-            return self.clean(response.text)
+            return self.clean(response)
             # fmt: on
         except (ConnectionError, Timeout, TooManyRedirects) as error:
             logging.error(error)
 
-    def clean(self, response: str) -> Dict:
-        response_json = json.loads(response)
-        if "data" not in response_json:
-            return response_json
+    def clean(self, response: Response) -> Dict:
+        response_json = json.loads(response.text)
+        if "data" not in response_json or response.status_code != 200:
+            logging.error(response_json)
+            return response_json["status"]["message"]
 
-        return {item["symbol"]: item["rank"] for item in response_json["data"]}
+        return {item["symbol"]: item.get("rank", "Unknown") for item in response_json["data"]}
 
 
 class AppV2:
