@@ -15,3 +15,4 @@ WEB_PORT = int(os.getenv("WEB_PORT", 8082))
 DEBUG = os.getenv("DEBUG", "1")
 
 MY_SERVICE_NAME = "cryptorankFetcher"
+HOST_MONGO = os.getenv("HOST_MONGO", "0.0.0.0")

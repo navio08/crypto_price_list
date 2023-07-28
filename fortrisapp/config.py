@@ -14,3 +14,4 @@ MY_SERVICE_NAME = "fortrisApp"
 
 HOST_COINMARKET = os.getenv("HOST_COINMARKET", "0.0.0.0")
 HOST_CRYPTORANK = os.getenv("HOST_CRYPTORANK", "0.0.0.0")
+HOST_MONGO = os.getenv("HOST_MONGO", "0.0.0.0")
