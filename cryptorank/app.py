@@ -1,12 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Header
 from requests import Session, Request, Response
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
-from typing import Dict, Any
+from typing import Annotated, Dict, Any
 
 import logging
 
 from config import API_KEY, URL_RANKLATEST, URL_RANKHISTORICAL, URL_VERSION, ENDPOINT_TIMEOUT
+from database import mongo
 
 
 class AppV1:
@@ -35,18 +36,21 @@ class AppV1:
             response.headers["cid"] = cid
         return response
 
-    def get_ranklatest(self, limit: str):
-        return self.get_crytporank(URL_RANKLATEST, {"limit": limit})
+    def get_ranklatest(self, limit: str, cid: Annotated[str | None, Header()] = "cid", timestamp: Annotated[str | None, Header()] = "timestamp"):
+        return self.get_crytporank(URL_RANKLATEST, cid, timestamp, {"limit": limit})
 
     def get_rankhistorical(self, limit: int, time: str):
         return self.get_crytporank(URL_RANKHISTORICAL, {"limit": limit, "time": time})
 
-    def get_crytporank(self, url: str, additional_query_params: Dict = None):
+    def get_crytporank(self, url: str, cid: str = None, timestamp: str = None, additional_query_params: Dict = None):
         try:
             additional_query_params = additional_query_params or {}
             # fmt: off
             response = self.session.get(url, params={**self.parameters, **additional_query_params}, timeout=ENDPOINT_TIMEOUT)
-            return self.clean(response)
+            cleaned_response = self.clean(response)
+            if isinstance(cleaned_response, dict):
+                self.save_in_database(cleaned_response, timestamp)
+            return cleaned_response
             # fmt: on
         except (ConnectionError, Timeout, TooManyRedirects) as error:
             logging.error(error)
@@ -58,6 +62,13 @@ class AppV1:
             return response_json["status"]["message"]
 
         return {item["symbol"]: item.get("rank", "Unknown") for item in response_json["data"]}
+
+    def save_in_database(self, response: Dict, timestamp: str) -> None:
+        for k, v in response.items():
+            item = {"ticker": k, "rank": v, "timestamp": timestamp}
+            res = mongo.find_one_and_update({"timestamp": timestamp}, {"$set": item}, upsert=True)
+            if not res:
+                logging.error(f"Error while inserting data: {res} in coinmarketcap")
 
 
 class AppV2:
