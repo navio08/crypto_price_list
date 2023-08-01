@@ -3,6 +3,7 @@ from requests import Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 from typing import Dict
 import json
+import datetime
 
 import logging
 import concurrent.futures
@@ -38,12 +39,13 @@ class App:
             return str(error)
 
     def fetch_data_multithreaded(self, limit: int, format: str = 'json'):
+        timestamp: str = datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%dT%H:%M:%S.%fZ")
         coinmarketUUID, cryptorankUUID = str(uuid4().hex), str(uuid4().hex)
         _my_futures = {coinmarketUUID: None, cryptorankUUID: None}
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = [
-                executor.submit(self.get_coinmarketcap, limit=limit, cid=coinmarketUUID),
-                executor.submit(self.get_cryptorank, limit=limit, cid=cryptorankUUID),
+                executor.submit(self.get_coinmarketcap, limit=limit, cid=coinmarketUUID, timestamp=timestamp),
+                executor.submit(self.get_cryptorank, limit=limit, cid=cryptorankUUID, timestamp=timestamp),
             ]
             for future in concurrent.futures.as_completed(futures):
                 _my_futures[self.get_uuid(future.result())] = future.result().text
@@ -55,16 +57,17 @@ class App:
         logging.info(result)
         return result
 
-    def get_coinmarketcap(self, limit: int, cid: str):
-        return self.fetch(URL_COINMARKET, limit, cid)
+    def get_coinmarketcap(self, limit: int, cid: str, timestamp: str):
+        return self.fetch(URL_COINMARKET, limit, cid, timestamp)
 
-    def get_cryptorank(self, limit: int, cid: str):
-        return self.fetch(URL_CRYPTORANK, limit, cid)
+    def get_cryptorank(self, limit: int, cid: str, timestamp: str):
+        return self.fetch(URL_CRYPTORANK, limit, cid, timestamp)
 
-    def fetch(self, url: str, limit: int, cid: str):
+    def fetch(self, url: str, limit: int, cid: str, timestamp: str):
         session = Session()
         session.headers.update(self.headers)
         session.headers.update({"cid": cid})
+        session.headers.update({"timestamp": timestamp})
         logging.info(f"sending request to:{url}")
         return session.get(url=url, params={"limit": limit}, timeout=ENDPOINT_TIMEOUT)
 

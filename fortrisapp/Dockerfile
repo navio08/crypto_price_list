@@ -10,6 +10,6 @@ RUN pip install -r requirements.txt
 ENV WEB_PORT=8080 DEBUG=0
 ENV HOST_COINMARKET=coinmarketcap HOST_CRYPTORANK=crytporank
 EXPOSE 8080
-ENV WEB_HOST=fortrisapp, HOST_MONGO=mongodb
+ENV WEB_HOST=fortrisapp HOST_MONGO=mongodb
 
 ENTRYPOINT [ "python3", "main.py" ]

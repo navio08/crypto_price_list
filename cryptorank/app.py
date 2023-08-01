@@ -7,7 +7,7 @@ from typing import Annotated, Dict, Any
 import logging
 
 from config import API_KEY, URL_RANKLATEST, URL_RANKHISTORICAL, URL_VERSION, ENDPOINT_TIMEOUT
-from database import mongo
+from database import mongo, connection
 
 
 class AppV1:
@@ -48,6 +48,8 @@ class AppV1:
             # fmt: off
             response = self.session.get(url, params={**self.parameters, **additional_query_params}, timeout=ENDPOINT_TIMEOUT)
             cleaned_response = self.clean(response)
+            logging.info(f"Mongo connection:{connection}")
+            logging.info(f"Mongo:{mongo}")
             if isinstance(cleaned_response, dict):
                 self.save_in_database(cleaned_response, timestamp)
             return cleaned_response
@@ -66,9 +68,10 @@ class AppV1:
     def save_in_database(self, response: Dict, timestamp: str) -> None:
         for k, v in response.items():
             item = {"ticker": k, "rank": v, "timestamp": timestamp}
-            res = mongo.find_one_and_update({"timestamp": timestamp}, {"$set": item}, upsert=True)
+            logging.info(f"Inserting:{item}")
+            res = mongo.find_one_and_update({"timestamp": timestamp, "ticker": k}, {"$set": item}, upsert=True)
             if not res:
-                logging.error(f"Error while inserting data: {res} in coinmarketcap")
+                logging.error(f"Error while inserting data: {item} in cryptorank")
 
 
 class AppV2:

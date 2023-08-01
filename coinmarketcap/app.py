@@ -66,9 +66,9 @@ class AppV1:
     def save_in_database(self, response: Dict, timestamp: str) -> None:
         for k, v in response.items():
             item = {"ticker": k, "price": v, "timestamp": timestamp}
-            res = mongo.find_one_and_update({"timestamp": timestamp}, {"$set": item}, upsert=True)
+            res = mongo.find_one_and_update({"timestamp": timestamp, "ticker": k}, {"$set": item}, upsert=True)
             if not res:
-                logging.error(f"Error while inserting data: {res} in coinmarketcap")
+                logging.error(f"Error while inserting data: {item} in coinmarketcap")
 
 
 class AppV2:
