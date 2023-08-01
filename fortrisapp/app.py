@@ -1,16 +1,15 @@
+import concurrent.futures
+import datetime
+import json
+import logging
+from typing import Dict
+from uuid import uuid4
+
+from aggregator import aggregate
+from config import ENDPOINT_TIMEOUT, HOST_COINMARKET, HOST_CRYPTORANK
 from fastapi import FastAPI
 from requests import Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
-from typing import Dict
-import json
-import datetime
-
-import logging
-import concurrent.futures
-from uuid import uuid4
-
-from config import HOST_COINMARKET, HOST_CRYPTORANK, ENDPOINT_TIMEOUT
-from aggregator import aggregate
 
 URL_COINMARKET = f"http://{HOST_COINMARKET}:8081/latest"
 URL_CRYPTORANK = f"http://{HOST_CRYPTORANK}:8082/ranklatest"

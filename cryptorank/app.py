@@ -1,13 +1,13 @@
-from fastapi import FastAPI, Header
-from requests import Session, Request, Response
-from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
-from typing import Annotated, Dict, Any
-
 import logging
+from typing import Annotated, Any, Dict
 
-from config import API_KEY, URL_RANKLATEST, URL_RANKHISTORICAL, URL_VERSION, ENDPOINT_TIMEOUT
-from database import mongo, connection
+from config import (API_KEY, ENDPOINT_TIMEOUT, URL_RANKHISTORICAL,
+                    URL_RANKLATEST, URL_VERSION)
+from database import connection, mongo
+from fastapi import FastAPI, Header
+from requests import Request, Response, Session
+from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 
 
 class AppV1:

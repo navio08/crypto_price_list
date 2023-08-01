@@ -1,8 +1,8 @@
-import uvicorn
 import logging
 
+import uvicorn
 from app import coinmarketApi  # noqa
-from config import WEB_HOST, WEB_PORT, DEBUG
+from config import DEBUG, WEB_HOST, WEB_PORT
 
 logging.basicConfig(level=logging.INFO)
 
