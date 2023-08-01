@@ -2,7 +2,6 @@ import os
 import sys
 
 import pytest
-
 from data.response import response
 
 CURRENT_FOLDER = os.path.dirname(os.path.abspath(__file__))
