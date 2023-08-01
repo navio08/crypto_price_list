@@ -5,6 +5,7 @@ import json
 from typing import Dict, Any, Annotated
 import logging
 from config import API_KEY, URL_LATEST, URL_HISTORICAL, URL_VERSION, ENDPOINT_TIMEOUT
+from database import mongo
 
 
 class AppV1:
@@ -25,24 +26,28 @@ class AppV1:
         )
 
     async def add_correlationId(self, request: Request, call_next):
+        cid = request.headers.get("cid")
+        # timestap = request.headers.get("timestamp")
         response = await call_next(request)
-        if cid := request.headers.get("cid"):
+        if cid:
             response.headers["cid"] = cid
         return response
 
-    def get_latest(self, limit: str, cid: Annotated[str | None, Header()] = "test_cid"):
-        return self.get_coinmarketcap(URL_LATEST, cid, {"limit": limit})
+    def get_latest(self, limit: str, cid: Annotated[str | None, Header()] = "cid", timestamp: Annotated[str | None, Header()] = "timestamp"):
+        return self.get_coinmarketcap(URL_LATEST, cid, timestamp, {"limit": limit})
 
     def get_historical(self, limit: int, date: str):
         return self.get_coinmarketcap(URL_HISTORICAL, {"limit": limit, "date": date})
 
-    def get_coinmarketcap(self, url: str, cid: str, additional_query_params: Dict = None):
+    def get_coinmarketcap(self, url: str, cid: str = None, timestamp: str = None, additional_query_params: Dict = None):
         try:
             additional_query_params = additional_query_params or {}
             # fmt: off
             response = self.session.get(url, params={**self.parameters, **additional_query_params}, timeout=ENDPOINT_TIMEOUT)
             response.headers.update({"cid": cid})
-            return self.clean(response)
+            cleaned_response = self.clean(response)
+            self.save_in_database(cleaned_response, timestamp)
+            return cleaned_response
             # fmt: on
         except (ConnectionError, Timeout, TooManyRedirects) as error:
             logging.error(error)
@@ -57,6 +62,13 @@ class AppV1:
             item["symbol"]: item["quote"]["USD"]["price"]
             for item in response_json["data"]
         }
+
+    def save_in_database(self, response: Dict, timestamp: str) -> None:
+        for k, v in response.items():
+            item = {"ticker": k, "price": v, "timestamp": timestamp}
+            res = mongo.find_one_and_update({"timestamp": timestamp, "ticker": k}, {"$set": item}, upsert=True)
+            if not res:
+                logging.error(f"Error while inserting data: {item} in coinmarketcap")
 
 
 class AppV2:

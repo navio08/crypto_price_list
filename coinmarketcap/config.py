@@ -15,3 +15,4 @@ WEB_PORT = int(os.getenv("WEB_PORT", 8081))
 DEBUG = os.getenv("DEBUG", "1")
 
 MY_SERVICE_NAME = "coinmarketcapFetcher"
+HOST_MONGO = os.getenv("HOST_MONGO", "0.0.0.0")
